@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:untitled4/custom_text_field.dart';
 import 'package:untitled4/data_model.dart';
 
 import 'custom_search_field.dart';
@@ -42,6 +43,7 @@ class _HomeState extends State<Home> {
           ),
           Expanded(
             child: ListView.builder(
+              shrinkWrap: false,
               itemCount: contacts?.length,
               itemBuilder: (context, index) {
                 return ListTile(
@@ -55,9 +57,25 @@ class _HomeState extends State<Home> {
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
-                  title: Text(contacts?.get(index)?.firstName ?? ""),
+                  title: Row(
+                    children: [
+                      Text(contacts?.get(index)?.firstName ?? ""),
+                      Text("    "),
+                      Text(contacts?.get(index)?.lastName ?? ""),
+                    ],
+                  ),
                   subtitle: Text(contacts?.get(index)?.phoneNumber ?? ""),
-                  onTap: () {},
+                  onTap: () {
+                    print("object");
+                    // // Navigate to the ContactDetail page when a ListTile is tapped
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (context) =>
+                    //         ContactListView(contacts: contacts[index]),
+                    //   ),
+                    // );
+                  },
                 );
               },
             ),
@@ -70,17 +88,36 @@ class _HomeState extends State<Home> {
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
-                title: const Text('Basic dialog title'),
+                title: const Text('Add New contact'),
                 content: SizedBox(
-                  height: MediaQuery.of(context).size.height / 3,
+                  height: MediaQuery.of(context).size.height / 4,
                   child: Column(children: [
-                    TextField(controller: firstNameController),
-                    TextField(
-                      controller: secondNameController,
-                    ),
-                    TextField(
-                      controller: phoneNumberController,
-                    ),
+                    // TextField(
+                    //   controller: firstNameController,
+                    //   style: TextStyle(
+                    //     color: Colors.blue,
+                    //   ),
+                    // ),
+                    CustomTextField(
+                        icon: Icons.person,
+                        label: "Frist Name",
+                        controller: firstNameController),
+                    // TextField(
+                    //   controller: secondNameController,
+                    // ),
+                    SizedBox(height: 15),
+                    CustomTextField(
+                        icon: Icons.person,
+                        label: "Last Name",
+                        controller: secondNameController),
+                    // TextField(
+                    //   controller: phoneNumberController,
+                    // ),
+                    SizedBox(height: 15),
+                    CustomTextField(
+                        icon: Icons.phone_android_outlined,
+                        label: "phoneNumber",
+                        controller: phoneNumberController),
                   ]),
                 ),
                 actions: <Widget>[

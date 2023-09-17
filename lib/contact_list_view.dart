@@ -21,7 +21,12 @@ class ContactListView extends StatelessWidget {
               // child: Text(contacts[index].initials), // Or display initials.
               ),
           title: Text(contacts[index].firstName!),
-          subtitle: Text(contacts[index].phoneNumber!),
+          subtitle: Column(
+            children: [
+              Text(contacts[index].phoneNumber!),
+              Text(contacts[index].lastName!),
+            ],
+          ),
           onTap: () {
             // Implement an action when a contact is tapped.
             // For example, you can open a detailed view of the contact.
