@@ -5,17 +5,20 @@ class CustomTextField extends StatelessWidget {
   final String label;
   final TextEditingController controller; // Add the controller parameter
   final TextInputType Type;
+  final Function(String? val) validation;
   const CustomTextField({
     Key? key,
     required this.icon,
     required this.label,
     required this.controller,
-    required this.Type, // Initialize the controller
+    required this.Type,
+    required this.validation, // Initialize the controller
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return TextFormField(
+      validator: (value) => validation(value),
       keyboardType: Type,
       controller: controller, // Use the provided controller
       style: TextStyle(

@@ -23,11 +23,22 @@ class _HomeState extends State<Home> {
   final secondNameController = TextEditingController();
   final phoneNumberController = TextEditingController();
   final searchController = TextEditingController();
+  final homePageKey = GlobalKey<FormState>();
+
   String query = ''; // Store search query
   @override
   void deleteContact(int index) {
     contacts?.deleteAt(index);
     setState(() {});
+  }
+
+  void toggleFavorite(int index) {
+    final contact = contacts?.getAt(index);
+    if (contact != null) {
+      contact.isFavorite = !contact.isFavorite;
+      contacts?.putAt(index, contact);
+      setState(() {});
+    }
   }
 
   void initState() {
@@ -45,95 +56,113 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: Text('Contacts'),
         actions: [
-          TextButton(
-              onPressed: () {
-                showDialog<void>(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text('Add New contact',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      content: SizedBox(
-                        height: MediaQuery.of(context).size.height / 4,
-                        child: Column(children: [
-                          // TextField(
-                          //   controller: firstNameController,
-                          //   style: TextStyle(
-                          //     color: Colors.blue,
-                          //   ),
-                          // ),
-                          CustomTextField(
-                              icon: Icons.person,
-                              label: "Frist Name",
-                              Type: TextInputType.text,
-                              controller: firstNameController),
-                          // TextField(
-                          //   controller: secondNameController,
-                          // ),
-                          SizedBox(height: 15),
-                          CustomTextField(
-                              Type: TextInputType.text,
-                              icon: Icons.person,
-                              label: "Last Name",
-                              controller: secondNameController),
-                          // TextField(
-                          //   controller: phoneNumberController,
-                          // ),
-                          SizedBox(height: 15),
-                          CustomTextField(
-                              Type: TextInputType.phone,
-                              icon: Icons.phone_android_outlined,
-                              label: "phoneNumber",
-                              controller: phoneNumberController),
-                        ]),
-                      ),
-                      actions: <Widget>[
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            textStyle: Theme.of(context).textTheme.labelLarge,
-                          ),
-                          child: const Text('Cancel'),
-                          onPressed: () {
-                            firstNameController.clear();
-                            secondNameController.clear();
-                            phoneNumberController.clear();
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            textStyle: Theme.of(context).textTheme.labelLarge,
-                          ),
-                          child: const Text('Add'),
-                          onPressed: () {
-                            setState(() {
-                              contacts?.add(
-                                DataModel(
-                                    firstName: firstNameController.text,
-                                    lastName: secondNameController.text,
-                                    phoneNumber: phoneNumberController.text),
-                              );
-                            });
-                            firstNameController.clear();
-                            secondNameController.clear();
-                            phoneNumberController.clear();
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-              child: CircleAvatar(
-                //radius: 30,
-                backgroundColor: Colors.black,
-                child: Center(
-                  child: Icon(Icons.add, color: Colors.white),
-                ),
-              )
-              // Text("add")
-              )
+          // TextButton(
+          //     onPressed: () {
+          //       showDialog<void>(
+          //         context: context,
+          //         builder: (BuildContext context) {
+          //           return AlertDialog(
+          //             title: const Text('Add New contact',
+          //                 style: TextStyle(fontWeight: FontWeight.bold)),
+          //             content: SizedBox(
+          //               height: MediaQuery.of(context).size.height / 4,
+          //               child: Column(children: [
+          //                 // TextField(
+          //                 //   controller: firstNameController,
+          //                 //   style: TextStyle(
+          //                 //     color: Colors.blue,
+          //                 //   ),
+          //                 // ),
+          //                 CustomTextField(
+          //                     validation: (value) {
+          //                       if (value!.isEmpty) {
+          //                         return 'Please enter your phone number.';
+          //                       }
+          //                       return null;
+          //                     },
+          //                     icon: Icons.person,
+          //                     label: "Frist Name",
+          //                     Type: TextInputType.text,
+          //                     controller: firstNameController),
+          //                 // TextField(
+          //                 //   controller: secondNameController,
+          //                 // ),
+          //                 SizedBox(height: 15),
+          //                 CustomTextField(
+          //                     validation: (value) {
+          //                       if (value!.isEmpty) {
+          //                         return 'Please enter your phone number.';
+          //                       }
+          //                       return null;
+          //                     },
+          //                     Type: TextInputType.text,
+          //                     icon: Icons.person,
+          //                     label: "Last Name",
+          //                     controller: secondNameController),
+          //                 // TextField(
+          //                 //   controller: phoneNumberController,
+          //                 // ),
+          //                 SizedBox(height: 15),
+          //                 CustomTextField(
+          //                     validation: (value) {
+          //                       if (value!.isEmpty) {
+          //                         return 'Please enter your phone number.';
+          //                       }
+          //                       return null;
+          //                     },
+          //                     Type: TextInputType.phone,
+          //                     icon: Icons.phone_android_outlined,
+          //                     label: "phoneNumber",
+          //                     controller: phoneNumberController),
+          //               ]),
+          //             ),
+          //             actions: <Widget>[
+          //               TextButton(
+          //                 style: TextButton.styleFrom(
+          //                   textStyle: Theme.of(context).textTheme.labelLarge,
+          //                 ),
+          //                 child: const Text('Cancel'),
+          //                 onPressed: () {
+          //                   firstNameController.clear();
+          //                   secondNameController.clear();
+          //                   phoneNumberController.clear();
+          //                   Navigator.of(context).pop();
+          //                 },
+          //               ),
+          //               TextButton(
+          //                 style: TextButton.styleFrom(
+          //                   textStyle: Theme.of(context).textTheme.labelLarge,
+          //                 ),
+          //                 child: const Text('Add'),
+          //                 onPressed: () {
+          //                   setState(() {
+          //                     contacts?.add(
+          //                       DataModel(
+          //                           firstName: firstNameController.text,
+          //                           lastName: secondNameController.text,
+          //                           phoneNumber: phoneNumberController.text),
+          //                     );
+          //                   });
+          //                   firstNameController.clear();
+          //                   secondNameController.clear();
+          //                   phoneNumberController.clear();
+          //                   Navigator.of(context).pop();
+          //                 },
+          //               ),
+          //             ],
+          //           );
+          //         },
+          //       );
+          //     },
+          //     child: CircleAvatar(
+          //       //radius: 30,
+          //       backgroundColor: Colors.black,
+          //       child: Center(
+          //         child: Icon(Icons.add, color: Colors.white),
+          //       ),
+          //     )
+          //     // Text("add")
+          //     )
         ],
       ),
       body: Container(
@@ -186,7 +215,7 @@ class _HomeState extends State<Home> {
                         itemBuilder: (context, index) {
                           final contact = filteredContacts[index];
                           return Dismissible(
-                            key: Key(contact.key.toString()),
+                            key: UniqueKey(),
                             background: Container(
                               color: Colors.red,
                               alignment: Alignment.centerRight,
@@ -256,39 +285,60 @@ class _HomeState extends State<Home> {
               return AlertDialog(
                 title: const Text('Add New contact',
                     style: TextStyle(fontWeight: FontWeight.bold)),
-                content: SizedBox(
-                  height: MediaQuery.of(context).size.height / 4,
-                  child: Column(children: [
-                    // TextField(
-                    //   controller: firstNameController,
-                    //   style: TextStyle(
-                    //     color: Colors.blue,
-                    //   ),
-                    // ),
-                    CustomTextField(
-                        icon: Icons.person,
-                        label: "Frist Name",
-                        Type: TextInputType.text,
-                        controller: firstNameController),
-                    // TextField(
-                    //   controller: secondNameController,
-                    // ),
-                    SizedBox(height: 15),
-                    CustomTextField(
-                        Type: TextInputType.text,
-                        icon: Icons.person,
-                        label: "Last Name",
-                        controller: secondNameController),
-                    // TextField(
-                    //   controller: phoneNumberController,
-                    // ),
-                    SizedBox(height: 15),
-                    CustomTextField(
-                        Type: TextInputType.phone,
-                        icon: Icons.phone_android_outlined,
-                        label: "phoneNumber",
-                        controller: phoneNumberController),
-                  ]),
+                content: Form(
+                  key: homePageKey,
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height / 3,
+                    child: Column(children: [
+                      // TextField(
+                      //   controller: firstNameController,
+                      //   style: TextStyle(
+                      //     color: Colors.blue,
+                      //   ),
+                      // ),
+                      CustomTextField(
+                          validation: (value) {
+                            if (value!.isEmpty) {
+                              return 'Please enter your phone number.';
+                            }
+                            return null;
+                          },
+                          icon: Icons.person,
+                          label: "Frist Name",
+                          Type: TextInputType.text,
+                          controller: firstNameController),
+                      // TextField(
+                      //   controller: secondNameController,
+                      // ),
+                      SizedBox(height: 15),
+                      CustomTextField(
+                          validation: (value) {
+                            if (value!.isEmpty) {
+                              return 'Please enter your phone number.';
+                            }
+                            return null;
+                          },
+                          Type: TextInputType.text,
+                          icon: Icons.person,
+                          label: "Last Name",
+                          controller: secondNameController),
+                      // TextField(
+                      //   controller: phoneNumberController,
+                      // ),
+                      SizedBox(height: 15),
+                      CustomTextField(
+                          validation: (value) {
+                            if (value!.isEmpty) {
+                              return 'Please enter your phone number.';
+                            }
+                            return null;
+                          },
+                          Type: TextInputType.phone,
+                          icon: Icons.phone_android_outlined,
+                          label: "phoneNumber",
+                          controller: phoneNumberController),
+                    ]),
+                  ),
                 ),
                 actions: <Widget>[
                   TextButton(
@@ -309,18 +359,21 @@ class _HomeState extends State<Home> {
                     ),
                     child: const Text('Add'),
                     onPressed: () {
-                      setState(() {
-                        contacts?.add(
-                          DataModel(
-                              firstName: firstNameController.text,
-                              lastName: secondNameController.text,
-                              phoneNumber: phoneNumberController.text),
-                        );
-                      });
-                      firstNameController.clear();
-                      secondNameController.clear();
-                      phoneNumberController.clear();
-                      Navigator.of(context).pop();
+                      if (homePageKey.currentState!.validate()) {
+                        print("object");
+                        setState(() {
+                          contacts?.add(
+                            DataModel(
+                                firstName: firstNameController.text,
+                                lastName: secondNameController.text,
+                                phoneNumber: phoneNumberController.text),
+                          );
+                        });
+                        firstNameController.clear();
+                        secondNameController.clear();
+                        phoneNumberController.clear();
+                        Navigator.of(context).pop();
+                      }
                     },
                   ),
                 ],
