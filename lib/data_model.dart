@@ -10,10 +10,13 @@ class DataModel extends HiveObject {
   final String? lastName;
   @HiveField(2)
   final String? phoneNumber;
+  @HiveField(3)
+  bool isFavorite; // New field to indicate if the contact is a fav
 
   DataModel({
     this.firstName,
     this.lastName,
     this.phoneNumber,
+    this.isFavorite = false,
   });
 }

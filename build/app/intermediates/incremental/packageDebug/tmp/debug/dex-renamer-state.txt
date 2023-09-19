@@ -1,4 +1,0 @@
-#Sun Sep 17 13:38:56 IST 2023
-base.0=/Users/ajmalm/StudioProjects/contact/build/app/intermediates/dex/debug/mergeDexDebug/classes.dex
-path.0=classes.dex
-renamed.0=classes.dex

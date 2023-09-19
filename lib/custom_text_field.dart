@@ -4,19 +4,23 @@ class CustomTextField extends StatelessWidget {
   final IconData icon;
   final String label;
   final TextEditingController controller; // Add the controller parameter
-
+  final TextInputType Type;
   const CustomTextField({
     Key? key,
     required this.icon,
     required this.label,
-    required this.controller, // Initialize the controller
+    required this.controller,
+    required this.Type, // Initialize the controller
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return TextField(
+      keyboardType: Type,
       controller: controller, // Use the provided controller
-      style: TextStyle(color: Color(0xFF000000)),
+      style: TextStyle(
+        color: Color(0xFF000000),
+      ),
       decoration: InputDecoration(
         fillColor: Color(0xfff4f5f9),
         filled: true,

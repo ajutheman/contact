@@ -1,9 +1,13 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:untitled4/custom_text_field.dart';
 import 'package:untitled4/data_model.dart';
 
+import 'contact_list_view.dart';
 import 'custom_search_field.dart';
+
+var leg = 0;
 
 class Home extends StatefulWidget {
   const Home({Key? key});
@@ -18,11 +22,20 @@ class _HomeState extends State<Home> {
   final firstNameController = TextEditingController();
   final secondNameController = TextEditingController();
   final phoneNumberController = TextEditingController();
-
+  final searchController = TextEditingController();
+  String query = ''; // Store search query
   @override
+  void deleteContact(int index) {
+    contacts?.deleteAt(index);
+    setState(() {});
+  }
+
   void initState() {
     // assigining hive data to a model variable
     contacts = Hive.box("hive_box");
+    super.initState();
+    contacts!.values.toList().sort((a, b) =>
+        a.firstName!.toLowerCase().compareTo(b.firstName!.toLowerCase()));
     super.initState();
   }
 
@@ -31,56 +44,209 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Contacts'),
-      ),
-      body: Column(
-        children: [
-          CustomSearchField(
-            icon: Icons.search,
-            label: "Search name",
-            onSearch: (query) {
-              setState(() {});
-            },
-          ),
-          Expanded(
-            child: ListView.builder(
-              shrinkWrap: false,
-              itemCount: contacts?.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.black,
-                    //add profile name
-                    child: Text(
-                      "${contacts?.get(index)?.firstName![0].toString().toUpperCase()}"
-                              "${contacts?.get(index)?.lastName![0].toString().toUpperCase()}" ??
-                          "",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  title: Row(
-                    children: [
-                      Text(contacts?.get(index)?.firstName ?? ""),
-                      Text("    "),
-                      Text(contacts?.get(index)?.lastName ?? ""),
-                    ],
-                  ),
-                  subtitle: Text(contacts?.get(index)?.phoneNumber ?? ""),
-                  onTap: () {
-                    print("object");
-                    // // Navigate to the ContactDetail page when a ListTile is tapped
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //     builder: (context) =>
-                    //         ContactListView(contacts: contacts[index]),
-                    //   ),
-                    // );
+        actions: [
+          TextButton(
+              onPressed: () {
+                showDialog<void>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Add New contact',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      content: SizedBox(
+                        height: MediaQuery.of(context).size.height / 4,
+                        child: Column(children: [
+                          // TextField(
+                          //   controller: firstNameController,
+                          //   style: TextStyle(
+                          //     color: Colors.blue,
+                          //   ),
+                          // ),
+                          CustomTextField(
+                              icon: Icons.person,
+                              label: "Frist Name",
+                              Type: TextInputType.text,
+                              controller: firstNameController),
+                          // TextField(
+                          //   controller: secondNameController,
+                          // ),
+                          SizedBox(height: 15),
+                          CustomTextField(
+                              Type: TextInputType.text,
+                              icon: Icons.person,
+                              label: "Last Name",
+                              controller: secondNameController),
+                          // TextField(
+                          //   controller: phoneNumberController,
+                          // ),
+                          SizedBox(height: 15),
+                          CustomTextField(
+                              Type: TextInputType.phone,
+                              icon: Icons.phone_android_outlined,
+                              label: "phoneNumber",
+                              controller: phoneNumberController),
+                        ]),
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            textStyle: Theme.of(context).textTheme.labelLarge,
+                          ),
+                          child: const Text('Cancel'),
+                          onPressed: () {
+                            firstNameController.clear();
+                            secondNameController.clear();
+                            phoneNumberController.clear();
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            textStyle: Theme.of(context).textTheme.labelLarge,
+                          ),
+                          child: const Text('Add'),
+                          onPressed: () {
+                            setState(() {
+                              contacts?.add(
+                                DataModel(
+                                    firstName: firstNameController.text,
+                                    lastName: secondNameController.text,
+                                    phoneNumber: phoneNumberController.text),
+                              );
+                            });
+                            firstNameController.clear();
+                            secondNameController.clear();
+                            phoneNumberController.clear();
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
                   },
                 );
               },
-            ),
-          ),
+              child: CircleAvatar(
+                //radius: 30,
+                backgroundColor: Colors.black,
+                child: Center(
+                  child: Icon(Icons.add, color: Colors.white),
+                ),
+              )
+              // Text("add")
+              )
         ],
+      ),
+      body: Container(
+        color: Colors.black26,
+        child: Column(
+          children: [
+            SizedBox(height: 9),
+            Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: CustomSearchField(
+                searchController: searchController,
+                icon: Icons.search,
+                suffixIcon: CupertinoIcons.line_horizontal_3,
+                suffixIcon1: CupertinoIcons.profile_circled,
+                label: "Search name",
+                onSearch: (query) {
+                  setState(() {
+                    this.query = query;
+                    searchController.text = query;
+                  });
+                },
+              ),
+            ),
+            Column(children: []),
+            Expanded(
+              child: ValueListenableBuilder<Box<DataModel>>(
+                valueListenable: Hive.box<DataModel>('hive_box').listenable(),
+                builder: (context, box, _) {
+                  final contactsList = contacts!.values.toList();
+                  contactsList.sort((a, b) => a.firstName!
+                      .toLowerCase()
+                      .compareTo(b.firstName!.toLowerCase()));
+                  final filteredContacts = query.isEmpty
+                      ? contactsList
+                      : contactsList
+                          .where((contact) =>
+                              contact.firstName!
+                                  .toLowerCase()
+                                  .contains(query.toLowerCase()) ||
+                              contact.lastName!
+                                  .toLowerCase()
+                                  .contains(query.toLowerCase()))
+                          .toList();
+
+                  return Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Card(
+                      child: ListView.builder(
+                        itemCount: filteredContacts.length,
+                        itemBuilder: (context, index) {
+                          final contact = filteredContacts[index];
+                          return Dismissible(
+                            key: Key(contact.key.toString()),
+                            background: Container(
+                              color: Colors.red,
+                              alignment: Alignment.centerRight,
+                              padding: EdgeInsets.only(right: 20.0),
+                              child: Icon(
+                                Icons.delete,
+                                color: Colors.white,
+                              ),
+                            ),
+                            onDismissed: (direction) {
+                              deleteContact(index);
+                            },
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                backgroundColor: Colors.black,
+                                child: Text(
+                                  "${contact.firstName![0].toUpperCase()}${contact.lastName![0].toUpperCase()}" ??
+                                      "",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                              title: Row(
+                                children: [
+                                  Text(contact.firstName ?? ""),
+                                  Text("    "),
+                                  Text(contact.lastName ?? ""),
+                                ],
+                              ),
+                              subtitle: Text(contact.phoneNumber ?? ""),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        ContactListView(contact),
+                                  ),
+                                );
+                              },
+                              trailing: IconButton(
+                                icon: Icon(
+                                  contact.isFavorite
+                                      ? Icons.star
+                                      : Icons.star_border,
+                                  color: Colors.yellow,
+                                ),
+                                onPressed: () {
+                                  // toggleFavorite(index);
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -88,7 +254,8 @@ class _HomeState extends State<Home> {
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
-                title: const Text('Add New contact'),
+                title: const Text('Add New contact',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
                 content: SizedBox(
                   height: MediaQuery.of(context).size.height / 4,
                   child: Column(children: [
@@ -101,12 +268,14 @@ class _HomeState extends State<Home> {
                     CustomTextField(
                         icon: Icons.person,
                         label: "Frist Name",
+                        Type: TextInputType.text,
                         controller: firstNameController),
                     // TextField(
                     //   controller: secondNameController,
                     // ),
                     SizedBox(height: 15),
                     CustomTextField(
+                        Type: TextInputType.text,
                         icon: Icons.person,
                         label: "Last Name",
                         controller: secondNameController),
@@ -115,6 +284,7 @@ class _HomeState extends State<Home> {
                     // ),
                     SizedBox(height: 15),
                     CustomTextField(
+                        Type: TextInputType.phone,
                         icon: Icons.phone_android_outlined,
                         label: "phoneNumber",
                         controller: phoneNumberController),
